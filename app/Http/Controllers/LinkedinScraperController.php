@@ -4,103 +4,167 @@ namespace App\Http\Controllers;
 
 //use League\OAuth2\Client\Provider\GenericProvider;
 use App\AccessToken;
+use App\Experience;
+use App\LinkedinProfile;
 use GuzzleHttp\Client;
 use Happyr\LinkedIn\Exception\LinkedInException;
-use Happyr\LinkedIn\LinkedIn;
-use Happyr\LinkedIn\Storage\IlluminateSessionStorage;
-use Http\Message\MessageFactory\GuzzleMessageFactory;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\Remote\DesiredCapabilities;
+use Facebook\WebDriver\WebDriverBy;
 
 class LinkedinScraperController extends Controller
 {
-    protected $appKey;
-    protected $appSecret;
-    protected $state;
+    protected $email;
+    protected $password;
 
     public function __construct()
     {
-        $this->appKey = config('linkedin.api_key');
-        $this->appSecret = config('linkedin.api_secret');
+        $this->email = config('linkedin.email');
+        $this->password = config('linkedin.password');
     }
 
-    public function index(Request $request)
+    public function index()
     {
-        $state = uniqid();
-        $request->session()->put('state', $state);
-
-        $redirectUrl = urlencode('http://127.0.0.1:8000/oauth/login');
-        $url = "https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=".$this->appKey."&redirect_uri=".$redirectUrl."&state=".$state."&scope=r_basicprofile";
-        $request->session()->save();
-
-        return view('welcome', compact('url'));
+        return view('welcome');
     }
 
-    public function post(Request $request)
+    public function scraper(Request $request)
     {
-        $state = uniqid();
-        $request->session()->put('state', $state);
+        $data = [];
+        $host = "localhost:4444/wd/hub";
+        $driver  = RemoteWebDriver::create($host, DesiredCapabilities::chrome());
+        $url = urlencode($request->url);
+        $driver->get($url);
 
-        $redirectUrl = urlencode('http://127.0.0.1:8000/oauth/login');
-        $url = "https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=".$this->appKey."&redirect_uri=".$redirectUrl."&state=".$state."&scope=r_basicprofile";
-        $request->session()->save();
-        return $url;
-    }
+        $currUrl = $driver->getCurrentUrl();
+        if($currUrl != $url){
+            $driver->get('https://www.linkedin.com');
+            $email  = $driver->findElement(WebDriverBy::className('login-email'))->click();
+            $driver->getKeyboard()->sendKeys($this->email);
+            sleep(0.5);
+            $email  = $driver->findElement(WebDriverBy::className('login-password'))->click();
+            $driver->getKeyboard()->sendKeys($this->password);
+            sleep(0.5);
+            $submit  = $driver->findElement(WebDriverBy::className('submit-button'))->click();
+            sleep(1.0);
 
-   public function get(Request $request)
-    {
-        $client = new Client();
-        $code = $_GET['code'];
-        $state = $_GET['state'];
-        $redirectUrl = 'http://127.0.0.1:8000/oauth/login';
-        $stateSession = $request->session()->get('state');
-        if($state == $stateSession){
-            $response = $client->request('POST', 'https://www.linkedin.com/oauth/v2/accessToken', [
-                'form_params' => [
-                    'grant_type' => 'authorization_code',
-                    'code' => $code,
-                    'redirect_uri' => $redirectUrl,
-                    'client_id' => $this->appKey,
-                    'client_secret' =>$this->appSecret
-                ]
-            ]);
+            $driver->get($url);
+            $driver->navigate()->to($url);
+            //$position = $driver->findElement(WebDriverBy::xpath('//section[@class = "pv-profile-section" ]'));
+//            $experience = $driver->findElement(WebDriverBy::xpath('//section[@id = "experience-section"]'));
+            $education = $driver->findElement(WebDriverBy::id('education-section'));
+//            $skills = $driver->findElement(WebDriverBy::className('.pv-skill-categories-section'));
+//            print_r($experience->getText());
+            print_r($education->getText());
+//            print_r($skills->getText());
 
-            $response = json_decode($response->getBody(),true);
-
-            AccessToken::create([
-                'access_token'  => $response['access_token'],
-                'expires_in'    => $response['expires_in'],
-                'state'         => $state,
-            ]);
-            $client = new Client();
-            $headers = [
-                'Authorization' => 'Bearer ' . $response['access_token']
-            ];
-            $client->request('GET', 'https://api.linkedin.com/v2/people/(id:059b11137)?projection=(id,firstName,lastName,industryId~)', [
-                'headers' => $headers,
-            ]);
-            return $client->getBody();
         } else {
-            return "Jo me jo";
-        }
+            $name = $driver->findElement( WebDriverBy::id('name'))->getText();
 
-    }
-    public function getME(){
-        $state = session('state');
-//        dd($state);
-        $accessToken = AccessToken::where('state',$state)->select('access_token')->first();
-        try {
-            $client = new Client();
-            $headers = [
-                'Authorization' => 'Bearer ' . $accessToken
-            ];
-            $client->request('GET', 'https://api.linkedin.com/v2/me', [
-                'headers' => $headers,
+            $description = $driver->findElement(WebDriverBy::id('summary'))->getText();
+
+            $location = $driver->findElement(WebDriverBy::className('locality'))->getText();
+
+            $linkedinProfile = LinkedinProfile::create([
+                'name'          => $name,
+                'description'   => $description,
+                'location'      => $location,
             ]);
-            return $client->getBody();
-        } catch (LinkedInException $e){
-            return $e->getMessage();
+
+            $linkedinProfile->fresh();
+
+            $experiencesTitle = $driver->findElements(WebDriverBy::cssSelector('ul.positions > li.position > header > h4.item-title'));
+            foreach ($experiencesTitle as $key => $title ){
+                $data[$key]['job_position'] = $title->getText();
+            }
+
+            $experiencesCompanyName = $driver->findElements(WebDriverBy::cssSelector('ul.positions > li.position > header > h5.item-subtitle'));
+            foreach ($experiencesCompanyName as $key => $companyName){
+                $data[$key]['company_name'] = $companyName->getText();
+            }
+
+            $experiencesLocation = $driver->findElements(WebDriverBy::cssSelector('ul.positions > li.position > div.meta > span.location'));
+            foreach ($experiencesLocation as $key => $location){
+                $data[$key]['location'] = $location->getText();
+            }
+
+            $experiencesDateRange = $driver->findElements(WebDriverBy::cssSelector('ul.positions > li.position > div.meta > span.date-range'));
+            foreach ($experiencesDateRange as $key => $date){
+                $data[$key]['dates'] = $date->getText();
+            }
+
+            foreach ($data as $toInsert){
+                $experiences = $linkedinProfile->experiences()->create([
+                    'job_position'      => $toInsert['job_position'],
+                    'company_name'      => $toInsert['company_name'],
+                    'location'          => $toInsert['location'],
+                    'dates'             => $toInsert['dates'],
+                ]);
+
+                return $experiences->fresh();
+            }
+
+
+
+           /* $educationTitle = $driver->findElements(WebDriverBy::cssSelector('ul.schools > li.school > header > h4.item-title'));
+            foreach ($educationTitle as $title) {
+                $data2[] = $title->getText();
+            }
+
+            $educationDegree = $driver->findElements(WebDriverBy::cssSelector('ul.schools > li.school > header > h4.item-subtitle'));
+            foreach ($educationDegree as $degree) {
+                $data2[] = $degree->getText();
+            }
+
+            $educationRange = $driver->findElements(WebDriverBy::cssSelector('ul.schools > li.school > div.meta > span.date-range'));
+            foreach ($educationRange as $date) {
+                $data2[] = $date->getText();
+            } */
+
+
+
+//
+//            $languages = $driver->findElement(WebDriverBy::id('languages'));
+//            print_r($languages->getText());
+//
+//            $projects = $driver->findElement(WebDriverBy::id('projects'));
+//            print_r($projects->getText());
+
         }
 
+//        $url = 'https://www.linkedin.com/in/rexhin-vorpsi/';
+//        $driver->get($url);
+//
+//        $currUrl = $driver->getCurrentUrl();
+//        if($currUrl != $url){
+//            $driver->navigate()->to('https://www.linkedin.com');
+//            sleep(3);
+//            $email  = $driver->findElement(WebDriverBy::className('login-email'))->click();
+//            $driver->getKeyboard()->sendKeys('rexhinvorpsi@yahoo.com');
+//            sleep(0.5);
+//            $password  = $driver->findElement(WebDriverBy::className('login-password'))->click();
+//            $driver->getKeyboard()->sendKeys('andromeda');
+//            sleep(0.5);
+//            $submit  = $driver->findElement(WebDriverBy::className('submit-button'))->click();
+//            sleep(1);
+//
+//            $driver->navigate()->to($url);
+//            //$position = $driver->findElement(WebDriverBy::xpath('//section[@class = "pv-profile-section" ]'));
+//            $experience = $driver->findElement(WebDriverBy::xpath('//section[@id = "experience-section"]'));
+//            $education = $driver->findElement(WebDriverBy::xpath('//section[@id = "education-section"]'));
+//            $skills = $driver->findElement(WebDriverBy::cssSelector('.pv-skill-categories-section'));
+//            print_r($experience->getText());
+//            print_r($education->getText());
+//            print_r($skills->getText());
+//        }else {
+//            $position = $driver->findElement(WebDriverBy::xpath('//section[@id = "experience-section"]/ul/li[@class="v-profile-section__sortable-item"]'));
+//            $education = $driver->findElement(WebDriverBy::xpath('//section[@id = "education"]/ul/li[@class="school"'));
+//            print_r($position->getText());
+//            print_r($education->fullText());
+//            //print_r($fullName->getText());
+//            print_r($position->getText());
+//            print_r($education->fullText());
+//        }
     }
 }
