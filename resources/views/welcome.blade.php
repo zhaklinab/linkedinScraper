@@ -79,7 +79,10 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    Laravel
+                    <form action="{{url('oauth/login')}}" method="post">
+                        <button type="submit">Go scraper</button>
+                    </form>
+
                 </div>
 
                 <div class="links">
