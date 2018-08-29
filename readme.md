@@ -4,6 +4,13 @@
 
 - Once you do all of the above, you can use the rest of the project.
 
+1. Run selenium 
+
+```
+    java -Dwebdriver.chrome.driver="chromedriver.exe" -jar selenium-server-standalone-x.x.x.jar
+```
+
+2. Run `php artisan serve` in the directory of your project
 
 ### Go Scraper 
 
