@@ -43,7 +43,7 @@ class LinkedinScraperController extends Controller
             $email  = $driver->findElement(WebDriverBy::className('login-email'))->click();
             $driver->getKeyboard()->sendKeys($this->email);
             sleep(0.5);
-            $email  = $driver->findElement(WebDriverBy::className('login-password'))->click();
+            $password  = $driver->findElement(WebDriverBy::className('login-password'))->click();
             $driver->getKeyboard()->sendKeys($this->password);
             sleep(0.5);
             $submit  = $driver->findElement(WebDriverBy::className('submit-button'))->click();
@@ -101,6 +101,7 @@ class LinkedinScraperController extends Controller
                     'location'          => $toInsert['location'],
                     'dates'             => $toInsert['dates'],
                 ]);
+                dd($experiences);
 
                 return $experiences->fresh();
             }
