@@ -1,6 +1,10 @@
 ## Linkedin Scraper
  
-> Note: To use this project you should have installed in your machine, <a href="https://www.seleniumhq.org/download/">a version of Selenium </a>, a driver of your favorite browser (mine <a href="http://chromedriver.chromium.org/downloads">Chrome </a>), composer to run `composer install` for building the `Laravel Project`. 
+> Note 1: To use this project you need to do the following: 
+1. Install in your machine, <a href="https://www.seleniumhq.org/download/">a version of Selenium </a>
+2. Install a driver of your favorite browser (mine <a href="http://chromedriver.chromium.org/downloads">Chrome </a>)
+3. Run : `composer install` for building the `Laravel Project`.
+4. Run : `php artisan migrate`
 
 > Note 2: For authorized linkedin Scraper you need to put in your enviroment file: 
 
