@@ -34,7 +34,7 @@ class LinkedinScraperController extends Controller
         $data = [];
         $host = "localhost:4444/wd/hub";
         $driver  = RemoteWebDriver::create($host, DesiredCapabilities::chrome());
-        $url = urlencode($request->url);
+        $url = $request->get('url');
         $driver->get($url);
 
         $currUrl = $driver->getCurrentUrl();
@@ -51,13 +51,13 @@ class LinkedinScraperController extends Controller
 
             $driver->get($url);
             $driver->navigate()->to($url);
-            //$position = $driver->findElement(WebDriverBy::xpath('//section[@class = "pv-profile-section" ]'));
-//            $experience = $driver->findElement(WebDriverBy::xpath('//section[@id = "experience-section"]'));
+            $position = $driver->findElement(WebDriverBy::xpath('//section[@class = "pv-profile-section" ]'));
+            $experience = $driver->findElement(WebDriverBy::xpath('//section[@id = "experience-section"]'));
             $education = $driver->findElement(WebDriverBy::id('education-section'));
-//            $skills = $driver->findElement(WebDriverBy::className('.pv-skill-categories-section'));
-//            print_r($experience->getText());
+            $skills = $driver->findElement(WebDriverBy::cssSelector('.pv-skill-categories-section'));
+            print_r($experience->getText());
             print_r($education->getText());
-//            print_r($skills->getText());
+            print_r($skills->getText());
 
         } else {
             $name = $driver->findElement( WebDriverBy::id('name'))->getText();
@@ -133,38 +133,5 @@ class LinkedinScraperController extends Controller
 
         }
 
-//        $url = 'https://www.linkedin.com/in/rexhin-vorpsi/';
-//        $driver->get($url);
-//
-//        $currUrl = $driver->getCurrentUrl();
-//        if($currUrl != $url){
-//            $driver->navigate()->to('https://www.linkedin.com');
-//            sleep(3);
-//            $email  = $driver->findElement(WebDriverBy::className('login-email'))->click();
-//            $driver->getKeyboard()->sendKeys('rexhinvorpsi@yahoo.com');
-//            sleep(0.5);
-//            $password  = $driver->findElement(WebDriverBy::className('login-password'))->click();
-//            $driver->getKeyboard()->sendKeys('andromeda');
-//            sleep(0.5);
-//            $submit  = $driver->findElement(WebDriverBy::className('submit-button'))->click();
-//            sleep(1);
-//
-//            $driver->navigate()->to($url);
-//            //$position = $driver->findElement(WebDriverBy::xpath('//section[@class = "pv-profile-section" ]'));
-//            $experience = $driver->findElement(WebDriverBy::xpath('//section[@id = "experience-section"]'));
-//            $education = $driver->findElement(WebDriverBy::xpath('//section[@id = "education-section"]'));
-//            $skills = $driver->findElement(WebDriverBy::cssSelector('.pv-skill-categories-section'));
-//            print_r($experience->getText());
-//            print_r($education->getText());
-//            print_r($skills->getText());
-//        }else {
-//            $position = $driver->findElement(WebDriverBy::xpath('//section[@id = "experience-section"]/ul/li[@class="v-profile-section__sortable-item"]'));
-//            $education = $driver->findElement(WebDriverBy::xpath('//section[@id = "education"]/ul/li[@class="school"'));
-//            print_r($position->getText());
-//            print_r($education->fullText());
-//            //print_r($fullName->getText());
-//            print_r($position->getText());
-//            print_r($education->fullText());
-//        }
     }
 }
