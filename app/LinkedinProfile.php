@@ -6,24 +6,24 @@ use Illuminate\Database\Eloquent\Model;
 
 class LinkedinProfile extends Model
 {
-    protected $fillable = [ 'name', 'email', 'description', 'location',];
+    protected $fillable = [ 'name', 'email', 'description', 'location', 'current_position',];
 
     public function experiences()
     {
         return $this->hasMany(Experience::class);
     }
 
-    public function education()
+    public function educations()
     {
         return $this->hasMany(Education::class);
     }
 
-    public function accomplishment()
+    public function accomplishments()
     {
         return $this->hasMany(Accomplishment::class);
     }
 
-    public function skill()
+    public function skills()
     {
         return $this->hasMany(Skill::class);
     }
