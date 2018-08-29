@@ -51,8 +51,8 @@ class LinkedinScraperController extends Controller
 
             $driver->get($url);
             $driver->navigate()->to($url);
-            $position = $driver->findElement(WebDriverBy::xpath('//section[@class = "pv-profile-section" ]'));
-            $experience = $driver->findElement(WebDriverBy::xpath('//section[@id = "experience-section"]'));
+            $position = $driver->findElement(WebDriverBy::xpath('//section[@class="profile-section" ]'));
+            $experience = $driver->findElement(WebDriverBy::xpath('//section[@id="experience-section"]'));
             $education = $driver->findElement(WebDriverBy::id('education-section'));
             $skills = $driver->findElement(WebDriverBy::cssSelector('.pv-skill-categories-section'));
             print_r($experience->getText());
@@ -101,10 +101,10 @@ class LinkedinScraperController extends Controller
                     'location'          => $toInsert['location'],
                     'dates'             => $toInsert['dates'],
                 ]);
-                dd($experiences);
 
-                return $experiences->fresh();
+                $experiences->fresh();
             }
+             return "Done";
 
 
 

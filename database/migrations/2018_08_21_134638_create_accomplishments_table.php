@@ -17,7 +17,7 @@ class CreateAccomplishmentsTable extends Migration
             $table->increments('id');
             $table->string('accomplishment_type');
             $table->string('accomplishment_name');
-            $table->integer('linkedin_profiles_id')->index();
+            $table->integer('linkedin_profile_id')->index();
             $table->timestamps();
         });
     }

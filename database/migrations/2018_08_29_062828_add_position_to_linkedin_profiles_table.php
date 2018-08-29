@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateSkillsTable extends Migration
+class AddPositionToLinkedinProfilesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,8 @@ class CreateSkillsTable extends Migration
      */
     public function up()
     {
-        Schema::create('skills', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
-            $table->integer('linkedin_profile_id')->index();
-            $table->timestamps();
+        Schema::table('linkedin_profiles', function (Blueprint $table) {
+            $table->string('current_position')->after('name')->nullable();
         });
     }
 
@@ -28,6 +25,8 @@ class CreateSkillsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('skills');
+        Schema::table('linkedin_profiles', function (Blueprint $table) {
+            $table->dropColumn('current_position');
+        });
     }
 }

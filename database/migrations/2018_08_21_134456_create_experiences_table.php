@@ -20,7 +20,7 @@ class CreateExperiencesTable extends Migration
             $table->string('location');
             $table->string('years_experience');
             $table->string('dates');
-            $table->integer('linkedin_profiles_id')->index();
+            $table->integer('linkedin_profile_id')->index();
             $table->timestamps();
         });
     }
