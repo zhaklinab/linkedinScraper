@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\WebDriverBy;
+use Illuminate\Support\Facades\DB;
 
 class LinkedinScraperController extends Controller
 {
@@ -101,6 +102,14 @@ class LinkedinScraperController extends Controller
          * Finds the elements of the general profile in linkedin.
          * Used className here too, but this can be improved for future purpose in xpath.
          */
+
+        try{
+
+        /*
+         * Starting a DB transaction to save them all or nothing.
+         */
+
+        DB::beginTransaction();
 
         $name = $driver->findElement( WebDriverBy::className('pv-top-card-section__name'))->getText();
 
@@ -256,7 +265,21 @@ class LinkedinScraperController extends Controller
             $educations->fresh();
         }
 
+        /*
+         * Closing the driver
+         */
+
         $driver->close();
+
+        /*
+         * Commiting everything in the database
+         */
+
+        DB::commit();
+
+        /*
+         * Making ready the response
+         */
 
         $linkedinProfile->experiences;
         $linkedinProfile->educations;
@@ -266,6 +289,18 @@ class LinkedinScraperController extends Controller
         $profile = $linkedinProfile;
 
         return view('profile', compact('profile'));
+
+        }catch (\Exception $exception){
+
+            /*
+             * Rolling back the transaction in case anything goes wrong.
+            */
+
+            DB::rollBack();
+
+            return $exception->getMessage();
+        }
+
     }
 
     /*
