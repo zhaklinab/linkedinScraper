@@ -59,6 +59,12 @@ class LinkedinScraperController extends Controller
         return $linkedinProfile;
     }
 
+    /*
+     * The part where we authorize the login  from linkedin page sending inputs email and password and submit.
+     * Email and Password are saved in the .env file.
+     * I used className for this part, to show another way of finding the Elements in a DOM.
+     */
+
     private function authorizeLogin($url, $driver)
     {
         $driver->get('https://www.linkedin.com');
@@ -91,6 +97,11 @@ class LinkedinScraperController extends Controller
         $topSkillArray = [];
         $otherSkillArray = [];
 
+        /*
+         * Finds the elements of the general profile in linkedin.
+         * Used className here too, but this can be improved for future purpose in xpath.
+         */
+
         $name = $driver->findElement( WebDriverBy::className('pv-top-card-section__name'))->getText();
 
         $currentPosition = $driver->findElement(WebDriverBy::className('pv-top-card-section__headline'))->getText();
@@ -111,6 +122,10 @@ class LinkedinScraperController extends Controller
         ]);
 
         $linkedinProfile->fresh();
+
+        /*
+         * The section of experiences
+         */
 
         $experiencesTitle = $driver->findElements(WebDriverBy::xpath("//section[@id='experience-section']//ul//div//li//a//div//h3"));
         foreach ($experiencesTitle as $key => $title ){
@@ -144,6 +159,10 @@ class LinkedinScraperController extends Controller
             $experiences->fresh();
         }
 
+        /*
+        * The section of education
+        */
+
         $educationTitle = $driver->findElements(WebDriverBy::xpath("//section[@id='education-section']//ul//li//div//a/child::div[2]//div//h3"));
         foreach ($educationTitle as $key => $title) {
             $educationArray[$key]['institution_name'] = $title->getText();
@@ -169,11 +188,23 @@ class LinkedinScraperController extends Controller
             $educations->fresh();
         }
 
+        /*
+         * Need to execute the scroll since linkedin uses lazyload
+         */
+
         $driver->executeScript('window.scrollTo(0, 1024);');
         sleep(2.00);
 
+        /*
+        * Need to execute the click button in Show More to get all the skills
+        */
+
         $driver->findElement(WebDriverBy::xpath("//button/span[contains(text(),'Show more')]"))->click();
         sleep(1.00);
+
+        /*
+         * The section of main skills
+         */
 
         $topSkills = $driver->findElements(WebDriverBy::xpath("//ol[@class='pv-skill-categories-section__top-skills pv-profile-section__section-info section-info pb4']//li//div//p//a//span[@class='Sans-17px-black-100%-semibold']"));
         foreach ($topSkills as $key => $topSkill){
@@ -189,6 +220,10 @@ class LinkedinScraperController extends Controller
             $topSkills->fresh();
         }
 
+        /*
+         * The section of other skills
+         */
+
         $otherSkills = $driver->findElements(WebDriverBy::xpath("//ol[@class='pv-skill-category-list__skills_list list-style-none']//li//div//p//a//span[@class='Sans-17px-black-100%-semibold']"));
         foreach ($otherSkills as $key => $otherSkill){
             $otherSkillArray[$key]['name'] = $otherSkill->getText();
@@ -202,6 +237,10 @@ class LinkedinScraperController extends Controller
 
             $otherSkills->fresh();
         }
+
+        /*
+         * The section of the accomplishments. Needs to be improved to accept all kind of accomplishments, because at the moment I made it support only the language.
+         */
 
         $accomplishments = $driver->findElements(WebDriverBy::xpath("//div[@class='pv-accomplishments-block__list-container']//ul//li"));
         foreach ($accomplishments as $key => $accomplishment){
@@ -233,6 +272,8 @@ class LinkedinScraperController extends Controller
         This function can be used if we want to get the public profile from a linkedin page.
         For the moment we are not applying this use case, but just the case where the user
         needs to be authorized. See function authorizedScraper ;)
+        For this one I decided to use cssSelector, just to try the way it works, and because the classes of the public profile were really `easy`.
+        But it can easily be transformed in  xpath.
     */
 
     private function publicScraper( $driver)
