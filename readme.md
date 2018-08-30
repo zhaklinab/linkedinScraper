@@ -1,4 +1,4 @@
-## Linkedin Scraper
+## Linkedin Scraper using Laravel
  
 > Note 1: To use this project you need to do the following: 
 1. Install in your machine, <a href="https://www.seleniumhq.org/download/">a version of Selenium </a>
