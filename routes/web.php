@@ -19,3 +19,4 @@ Route::middleware('session')->get('/user', function (Request $request) {
     return $request->user();
 });
 Route::get('/go-scraper', 'LinkedinScraperController@index');
+Route::get('/profile/{id}', 'LinkedinScraperController@get');

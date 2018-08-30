@@ -9,101 +9,50 @@
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Saira+Extra+Condensed:500,700" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,800,800i" rel="stylesheet">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 
+        <!-- Custom styles for this template -->
+        <link href="{{asset('css/resume.min.css')}}" rel="stylesheet">
+        <!-- Bootstrap core CSS -->
+        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
         <!-- Styles -->
-        <style>
-            html, body {
-                background-color: #fff;
-                color: #636b6f;
-                font-family: 'Raleway', sans-serif;
-                font-weight: 100;
-                height: 100vh;
-                margin: 0;
-            }
-
-            .full-height {
-                height: 100vh;
-            }
-
-            .flex-center {
-                align-items: center;
-                display: flex;
-                justify-content: center;
-            }
-
-            .position-ref {
-                position: relative;
-            }
-
-            .top-right {
-                position: absolute;
-                right: 10px;
-                top: 18px;
-            }
-
-            .content {
+       <style>
+            .button-style{
+                background-color: #bd5d38;
+                border: none;
+                color: white;
+                padding: 15px 32px;
                 text-align: center;
-            }
-
-            .title {
-                font-size: 84px;
-            }
-
-            .links > a {
-                color: #636b6f;
-                padding: 0 25px;
-                font-size: 12px;
-                font-weight: 600;
-                letter-spacing: .1rem;
                 text-decoration: none;
-                text-transform: uppercase;
-            }
-
-            .m-b-md {
-                margin-bottom: 30px;
-            }
-
-            input[type=text], select {
-                width: 100%;
-                padding: 12px 20px;
-                margin: 8px 0;
                 display: inline-block;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-                box-sizing: border-box;
+                font-size: 16px;
+                margin: 4px 2px;
+                cursor: pointer;
             }
 
         </style>
     </head>
     <body>
-        <div class="flex-center position-ref full-height">
-            @if (Route::has('login'))
-                <div class="top-right links">
-                    @auth
-                        <a href="{{ url('/home') }}">Home</a>
-                    @else
-                        <a href="{{ route('login') }}">Login</a>
-                        <a href="{{ route('register') }}">Register</a>
-                    @endauth
-                </div>
-            @endif
+        <div class="container-fluid">
+           <div class="col-md-10" style="margin-top: 150px;">
+               <center>
+                    <h1 style="font-size: 100px; color: #bd5d38;">
+                       <span>Linkedin Scraper</span>
+                    </h1>
+               </center>
+            </div>
 
-            <div class="content">
-                <div class="title m-b-md">
-                    <form action="{{url('api/scraper')}}" method="post">
-                        <input name="url" type="text"/>
-                        <button type="submit">Go scraper</button>
-                    </form>
-
-                </div>
-
-                <div class="links">
-                    <a href="https://laravel.com/docs">Documentation</a>
-                    <a href="https://laracasts.com">Laracasts</a>
-                    <a href="https://laravel-news.com">News</a>
-                    <a href="https://forge.laravel.com">Forge</a>
-                    <a href="https://github.com/laravel/laravel">GitHub</a>
-                </div>
+            <div class="col-md-10">
+               <form action="{{url('api/scraper')}}" method="post">
+                    <div class="form-group">
+                        <input name="url" class="form-control" type="text" placeholder="Enter linkedin profile url" required/>
+                    </div>
+                    <div class="form-group">
+                       <center><button class="btn button-style" type="submit">Go scraper</button></center>
+                    </div>
+                </form>
             </div>
         </div>
     </body>

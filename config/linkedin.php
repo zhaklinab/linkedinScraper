@@ -2,6 +2,6 @@
 
 
 return [
-    'email' => env('LINKEDIN_EMAIL','yourapikey'),
-    'password' => env('LINKEDIN_PASSWORD','yourapisecret'),
+    'email' => env('LINKEDIN_EMAIL'),
+    'password' => env('LINKEDIN_PASSWORD'),
 ];

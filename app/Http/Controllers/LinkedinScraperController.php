@@ -26,6 +26,20 @@ class LinkedinScraperController extends Controller
         return view('welcome');
     }
 
+    public function get($id)
+    {
+        $linkedinProfile = LinkedinProfile::find($id);
+
+        $linkedinProfile->experiences;
+        $linkedinProfile->educations;
+        $linkedinProfile->skills;
+        $linkedinProfile->accomplishments;
+
+        $profile = $linkedinProfile;
+
+        return view('profile', compact('profile'));
+    }
+
     public function scraper(Request $request)
     {
         $url = $request->get('url');
@@ -40,32 +54,34 @@ class LinkedinScraperController extends Controller
         $driver->get('https://www.linkedin.com');
 
         $this->authorizeLogin($url, $driver);
-        $this->authorizedScraper($driver);
+        $linkedinProfile = $this->authorizedScraper($driver);
 
-        return "Done";
+        return $linkedinProfile;
     }
 
     private function authorizeLogin($url, $driver)
     {
         $driver->get('https://www.linkedin.com');
+
         $email  = $driver->findElement(WebDriverBy::className('login-email'))->click();
         $driver->getKeyboard()->sendKeys($this->email);
         sleep(0.5);
+
         $password  = $driver->findElement(WebDriverBy::className('login-password'))->click();
         $driver->getKeyboard()->sendKeys($this->password);
         sleep(0.5);
+
         $submit  = $driver->findElement(WebDriverBy::className('submit-button'))->click();
         sleep(1.0);
+
         try{
-            $driver->get($url);
             $driver->navigate()->to($url);
+            sleep(2.0);
+
         }catch (UnknownServerException $e){
             return $e->getMessage();
         }
-
-        sleep(1.0);
     }
-
 
     private function authorizedScraper($driver)
     {
@@ -76,9 +92,6 @@ class LinkedinScraperController extends Controller
         $otherSkillArray = [];
 
         $name = $driver->findElement( WebDriverBy::className('pv-top-card-section__name'))->getText();
-        if(!$name){
-            return "Please enter a valid linkedin profile url!";
-        }
 
         $currentPosition = $driver->findElement(WebDriverBy::className('pv-top-card-section__headline'))->getText();
 
@@ -86,11 +99,15 @@ class LinkedinScraperController extends Controller
 
         $description = $driver->findElement(WebDriverBy::className('lt-line-clamp__line'))->getText();
 
+        $url = $driver->findElement(WebDriverBy::xpath("//div[@class='pv-top-card-section__photo presence-entity__image EntityPhoto-circle-9 ember-view']"))->getAttribute('style');
+
+
         $linkedinProfile = LinkedinProfile::create([
-            'name'          => $name,
-            'description'   => $description,
-            'location'      => $location,
-            'current_position' => $currentPosition,
+            'name'              => $name,
+            'description'       => $description,
+            'location'          => $location,
+            'current_position'  => $currentPosition,
+            'profile_url'       => $url,
         ]);
 
         $linkedinProfile->fresh();
@@ -105,12 +122,13 @@ class LinkedinScraperController extends Controller
             $experienceArray[$key]['company_name'] = $companyName->getText();
         }
 
-        $experiencesLocation = $driver->findElements(WebDriverBy::xpath("//section[@id='experience-section']//ul//div//li//a//div/child::h4[2]/child::span[2]"));
+        $experiencesLocation = $driver->findElements(WebDriverBy::xpath("//section[@id='experience-section']//ul//div//li//a//div/child::h4[4]/child::span[2]"));
         foreach ($experiencesLocation as $key => $location){
             $experienceArray[$key]['location'] = $location->getText();
+
         }
 
-        $experiencesDateRange = $driver->findElements(WebDriverBy::xpath("//section[@id='experience-section']//ul//div//li//a//div/child::h4[4]/child::span[2]"));
+        $experiencesDateRange = $driver->findElements(WebDriverBy::xpath("//section[@id='experience-section']//ul//div//li//a//div/child::h4[2]/child::span[2]"));
         foreach ($experiencesDateRange as $key => $date){
             $experienceArray[$key]['dates'] = $date->getText();
         }
@@ -151,8 +169,8 @@ class LinkedinScraperController extends Controller
             $educations->fresh();
         }
 
-        $driver->executeScript('window.scrollTo(0,document.body.scrollHeight);');
-        sleep(1.00);
+        $driver->executeScript('window.scrollTo(0, 1024);');
+        sleep(2.00);
 
         $driver->findElement(WebDriverBy::xpath("//button/span[contains(text(),'Show more')]"))->click();
         sleep(1.00);
@@ -198,12 +216,23 @@ class LinkedinScraperController extends Controller
 
             $educations->fresh();
         }
+
+        $driver->close();
+
+        $linkedinProfile->experiences;
+        $linkedinProfile->educations;
+        $linkedinProfile->skills;
+        $linkedinProfile->accomplishments;
+
+        $profile = $linkedinProfile;
+
+        return view('profile', compact('profile'));
     }
 
     /*
         This function can be used if we want to get the public profile from a linkedin page.
         For the moment we are not applying this use case, but just the case where the user
-        needs to be authorized. See function authorizedScraper
+        needs to be authorized. See function authorizedScraper ;)
     */
 
     private function publicScraper( $driver)

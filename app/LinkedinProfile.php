@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class LinkedinProfile extends Model
 {
-    protected $fillable = [ 'name', 'email', 'description', 'location', 'current_position',];
+    protected $fillable = [ 'name', 'email', 'description', 'location', 'current_position','profile_url'];
 
     public function experiences()
     {
