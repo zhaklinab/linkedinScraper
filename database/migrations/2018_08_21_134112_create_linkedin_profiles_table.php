@@ -15,9 +15,9 @@ class CreateLinkedinProfilesTable extends Migration
     {
         Schema::create('linkedin_profiles', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name');
-            $table->string('email');
-            $table->string('description');
+            $table->string('name')->nullable();
+            $table->string('email')->nullable();
+            $table->string('description')->nullable();
             $table->string('location');
             $table->timestamps();
         });

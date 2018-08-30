@@ -15,8 +15,8 @@ class CreateAccomplishmentsTable extends Migration
     {
         Schema::create('accomplishments', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('accomplishment_type');
-            $table->string('accomplishment_name');
+            $table->string('accomplishment_type')->nullable();
+            $table->string('accomplishment_name')->nullable();
             $table->integer('linkedin_profile_id')->index();
             $table->timestamps();
         });

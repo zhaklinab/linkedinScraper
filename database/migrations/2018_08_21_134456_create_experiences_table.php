@@ -15,11 +15,11 @@ class CreateExperiencesTable extends Migration
     {
         Schema::create('experiences', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('job_position');
-            $table->string('company_name');
-            $table->string('location');
-            $table->string('years_experience');
-            $table->string('dates');
+            $table->string('job_position')->nullable();
+            $table->string('company_name')->nullable();
+            $table->string('location')->nullable();
+            $table->string('years_experience')->nullable();
+            $table->string('dates')->nullable();
             $table->integer('linkedin_profile_id')->index();
             $table->timestamps();
         });

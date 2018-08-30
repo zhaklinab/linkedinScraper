@@ -15,9 +15,9 @@ class CreateEducationsTable extends Migration
     {
         Schema::create('educations', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('institution_name');
-            $table->string('degree');
-            $table->string('dates');
+            $table->string('institution_name')->nullable();
+            $table->string('degree')->nullable();
+            $table->string('dates')->nullable();
             $table->integer('linkedin_profile_id')->index();
             $table->timestamps();
         });
